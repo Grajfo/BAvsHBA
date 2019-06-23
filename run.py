@@ -40,9 +40,8 @@ class BatAlgorithmBenchmark(Benchmark):
             Qmin = swap_Qmax(sol[3])
             Qmax = swap_Qmax(sol[4])
 
-            scores.append([np, r, a, Qmin, Qmax])
-            return scores
+            return np
+            #Nevem kaj moram vrnit tu kakšne razultate
+
         return evaluate
 
-
-scores = []
