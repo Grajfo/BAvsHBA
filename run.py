@@ -37,7 +37,7 @@ class BatAlgorithmBenchmark(Benchmark):
             np = swap_n_population(sol[0])
             r = swap_r(sol[1])
             a = swap_A(sol[2])
-            Qmin = swap_Qmax(sol[3])
+            Qmin = swap_Qmin(sol[3])
             Qmax = swap_Qmax(sol[4])
 
             return np

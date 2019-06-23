@@ -1,6 +1,4 @@
 import pandas as pd
-import xlsxwriter
-from xlrd import open_workbook
 import os.path
 
 

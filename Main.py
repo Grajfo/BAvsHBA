@@ -70,7 +70,6 @@ def hybrid_comparison_by_benchmarks(filename):
     excel.export_to_sheets(bat_data_frame, filename)
 
 
-
 def comparison_by_runner(filename):
     statistic_bat_algorithm = []
 

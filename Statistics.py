@@ -1,6 +1,6 @@
 import numpy as np
 
-
+'#Za izračun statističnih podatkov'
 class Statistics:
 
     def __init__(self, array, algorithm_name, benchmark_name, dimension_name=None, Np=None, minFreq=None, maxFreq=None):
