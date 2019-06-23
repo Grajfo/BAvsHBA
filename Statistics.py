@@ -3,10 +3,10 @@ import numpy as np
 
 class Statistics:
 
-    def __init__(self, array, algorithm_name, benchmark_name, dimension_name=None, Np=None, minFreq=None, maxFreq=None ):
+    def __init__(self, array, algorithm_name, benchmark_name, dimension_name=None, Np=None, minFreq=None, maxFreq=None):
         self.algorithmName = algorithm_name
         self.dimensionName = dimension_name
-        self.polution = Np
+        self.population = Np
         self.minFrequency = minFreq
         self.maxFrequency = maxFreq
         self.benchName = benchmark_name
