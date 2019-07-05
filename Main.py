@@ -5,6 +5,7 @@ from NiaPy.algorithms.basic import BatAlgorithm
 from NiaPy.algorithms.modified import HybridBatAlgorithm
 import randomGenerator as rg
 from NiaPy.runner import Runner
+import run
 
 dimension = [10, 20, 30]
 usebenchmarks = [
@@ -21,14 +22,39 @@ usebenchmarks = [
 ]
 
 
+def calculate_parameters(Dim):
+    dictvalues = {}
+
+    runner = Runner(
+        D=Dim,
+        nFES=1000*Dim,
+        nRuns=1,
+        useAlgorithms=["BatAlgorithm"],
+        useBenchmarks=[run.BatAlgorithmBenchmarkNp(),
+                       run.BatAlgorithmBenchmarkA(),
+                       run.BatAlgorithmBenchmarkr(),
+                       run.BatAlgorithmBenchmarkQmin(),
+                       run.BatAlgorithmBenchmarkQmax()
+                       ])
+    runner.run()
+    best = runner.results
+    for algorithm, array in best.items():
+        for benchmark, value in array.items():
+            dictvalues[benchmark] = value[0][1]
+
+    return dictvalues
+
+
 def bat_comparison_by_benchmark(filename):
     statistic_bat_algorithm = []
     for bench in usebenchmarks:
         for dim in dimension:
             temp_list = []
-            for best in range(25):
+            for best in range(5):
+                bp = calculate_parameters(dim)
+                bpl = list(bp.values())
                 task = StoppingTask(D=dim, nFES=dim*1000, optType=OptimizationType.MINIMIZATION, benchmark=bench)
-                algo = BatAlgorithm(NP=15, A=0.5, r=0.5, Qmin=0.0, Qmax=2.0)
+                algo = BatAlgorithm(NP=int(bpl[0]), A=bpl[1], r=bpl[2], Qmin=bpl[3], Qmax=bpl[4])
                 best = algo.run(task=task)
                 temp_list.append(best[1])
 
@@ -104,4 +130,5 @@ def comparison_by_runner(filename):
 
 
 if __name__ == '__main__':
-    comparison_by_runner("BA&HBA" + str(rg.random_digit(6)))
+    bat_comparison_by_benchmark("probamo")
+  #  comparison_by_runner("BA&HBA" + str(rg.random_digit(6)))
