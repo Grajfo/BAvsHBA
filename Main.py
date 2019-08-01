@@ -5,12 +5,16 @@ from NiaPy.algorithms.basic import BatAlgorithm
 from NiaPy.algorithms.modified import HybridBatAlgorithm
 import randomGenerator as rg
 from NiaPy.runner import Runner
-import run
+import itertools
 
 dimension = [10, 20, 30]
+np = [20, 30, 50]
+combined = list(itertools.product(dimension, np))
+
+
 usebenchmarks = [
     'schwefel',
-    'happyCat',
+    'xin-She',
     'ackley',
     'whitley',
     'rosenbrock',
@@ -22,47 +26,22 @@ usebenchmarks = [
 ]
 
 
-def calculate_parameters(Dim):
-    dictvalues = {}
-
-    runner = Runner(
-        D=Dim,
-        nFES=1000*Dim,
-        nRuns=1,
-        useAlgorithms=["BatAlgorithm"],
-        useBenchmarks=[run.BatAlgorithmBenchmarkNp(),
-                       run.BatAlgorithmBenchmarkA(),
-                       run.BatAlgorithmBenchmarkr(),
-                       run.BatAlgorithmBenchmarkQmin(),
-                       run.BatAlgorithmBenchmarkQmax()
-                       ])
-    runner.run()
-    best = runner.results
-    for algorithm, array in best.items():
-        for benchmark, value in array.items():
-            dictvalues[benchmark] = value[0][1]
-
-    return dictvalues
-
-
 def bat_comparison_by_benchmark(filename):
     statistic_bat_algorithm = []
     for bench in usebenchmarks:
-        for dim in dimension:
+        for x, y in combined:
             temp_list = []
-            for best in range(5):
-                bp = calculate_parameters(dim)
-                bpl = list(bp.values())
-                task = StoppingTask(D=dim, nFES=dim*1000, optType=OptimizationType.MINIMIZATION, benchmark=bench)
-                algo = BatAlgorithm(NP=int(bpl[0]), A=bpl[1], r=bpl[2], Qmin=bpl[3], Qmax=bpl[4])
+            for best in range(25):
+                task = StoppingTask(D=x, nFES=x*1000, optType=OptimizationType.MINIMIZATION, benchmark=bench)
+                algo = HybridBatAlgorithm(NP=y, A=0.5, r=0.5, Qmin=0.0, Qmax=2.0)
                 best = algo.run(task=task)
                 temp_list.append(best[1])
 
-            print(str(bench) + str(dim))
             bat_values = st(array=temp_list,
                             algorithm_name="BatAlgorithm",
                             benchmark_name=bench,
-                            dimension_name=str(dim)
+                            Np=y,
+                            dimension_name=str(x)
                             ).vrniTupleDim()
             statistic_bat_algorithm.append(bat_values)
 
@@ -75,19 +54,19 @@ def hybrid_comparison_by_benchmarks(filename):
 
     statistic_hybrid_bat_algorithm = []
     for bench in usebenchmarks:
-        for dim in dimension:
+        for x, y in combined:
             temp_list = []
             for best in range(25):
-                task = StoppingTask(D=dim, nFES=dim*1000, optType=OptimizationType.MINIMIZATION, benchmark=bench)
-                algo = HybridBatAlgorithm(NP=15, A=0.5, r=0.5, F=0.5, CR=0.9, Qmin=0.0, Qmax=2.0)
+                task = StoppingTask(D=x, nFES=x*1000, optType=OptimizationType.MINIMIZATION, benchmark=bench)
+                algo = HybridBatAlgorithm(NP=y, A=0.5, r=0.5, F=0.5, CR=0.9, Qmin=0.0, Qmax=2.0)
                 best = algo.run(task=task)
                 temp_list.append(best[1])
 
-            print(str(bench) + str(dim))
             hybrid_bat_values = st(array=temp_list,
                                    algorithm_name="HybridBatAlgorithm",
                                    benchmark_name=bench,
-                                   dimension_name=str(dim)
+                                   Np=y,
+                                   dimension_name=str(x)
                                    ).vrniTupleDim()
             statistic_hybrid_bat_algorithm.append(hybrid_bat_values)
 
@@ -98,37 +77,39 @@ def hybrid_comparison_by_benchmarks(filename):
 
 def comparison_by_runner(filename):
     statistic_bat_algorithm = []
+    statistic_hybrid_bat_algorithm = []
 
-    for dim in dimension:
+    for x, y in combined:
         runner = Runner(
-            D=dim,
-            NP=15,
-            nFES=dim*1000,
+            D=x,
+            NP=y,
+            nFES=x*1000,
             nRuns=1,
             useAlgorithms=["BatAlgorithm", "HybridBatAlgorithm"],
             useBenchmarks=usebenchmarks
         )
         runner.run(verbose=True)
         best = runner.results
-
         for algorithm, array in best.items():
             for benchmark, value in array.items():
                 if algorithm == "BatAlgorithm":
                     bat_values = st(array=value[0][0], algorithm_name="BatAlgorithm",
-                                    benchmark_name=benchmark, dimension_name=dim
+                                    benchmark_name=benchmark, dimension_name=x, Np=y
                                     ).vrniTupleDim()
                     statistic_bat_algorithm.append(bat_values)
                 elif algorithm == "HybridBatAlgorithm":
                     hybrid_bat_values = st(array=value[0][0], algorithm_name="HybridBatAlgorithm",
-                                           benchmark_name=benchmark, dimension_name=dim
+                                           benchmark_name=benchmark, dimension_name=x, Np=y
                                            ).vrniTupleDim()
-                    statistic_bat_algorithm.append(hybrid_bat_values)
+                    statistic_hybrid_bat_algorithm.append(hybrid_bat_values)
 
     excel = ex()
     bat_data_frame = excel.tableToDataFrame(statistic_bat_algorithm)
-    excel.export_to_sheets(bat_data_frame, filename)
+    hybrid_bat_data_frame = excel.tableToDataFrame(statistic_hybrid_bat_algorithm)
+
+    excel.export_to_sheets(bat_data_frame, filename, BatAlgorithm)
+    excel.export_to_sheets(hybrid_bat_data_frame, filename, HybridBatAlgorithm)
 
 
 if __name__ == '__main__':
-    bat_comparison_by_benchmark("probamo")
-  #  comparison_by_runner("BA&HBA" + str(rg.random_digit(6)))
+  comparison_by_runner("BA&HBA" + str(rg.random_digit(6)))

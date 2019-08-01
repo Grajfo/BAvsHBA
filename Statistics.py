@@ -3,12 +3,10 @@ import numpy as np
 '#Za izračun statističnih podatkov'
 class Statistics:
 
-    def __init__(self, array, algorithm_name, benchmark_name, dimension_name=None, Np=None, minFreq=None, maxFreq=None):
+    def __init__(self, array, algorithm_name, benchmark_name, dimension_name=None, Np=None):
         self.algorithmName = algorithm_name
         self.dimensionName = dimension_name
         self.population = Np
-        self.minFrequency = minFreq
-        self.maxFrequency = maxFreq
         self.benchName = benchmark_name
         self.array = array if isinstance(array, np.ndarray) else np.asarray(array)
         self.__minvalue = self.array.min()
@@ -38,8 +36,8 @@ class Statistics:
         return self.__std
 
     def vrniTupleDim(self):
-        tup = (self.algorithmName,
-               self.dimensionName,
+        tup = (self.dimensionName,
+               self.population,
                self.benchName,
                self.__minvalue,
                self.__maxvalue,

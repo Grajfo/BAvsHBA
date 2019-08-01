@@ -1,40 +1,48 @@
 from NiaPy import Runner
-from NiaPy.algorithms.modified import HybridBatAlgorithm
-from NiaPy.algorithms.basic import BatAlgorithm
-from NiaPy.task.task import StoppingTask, OptimizationType
-from NiaPy.benchmarks import Benchmark
-import run
+from Statistics import Statistics as st
+from Excel import Excel as ex
+import itertools
 
 
-class MyBenchmark(Benchmark):
-    def __init__(self):
-        Benchmark.__init__(self, -1, 1)
 
-    def function(self):
-        def evaluate(D, sol):
-            val = 0.0
-            for i in range(D):
-                val += sol[i] ** 2
-            return val
-
-        return evaluate
+dimension = [10, 20, 30]
+np = [20, 30, 50]
+combined = list(itertools.product(dimension, np))
 
 
-def hba():
-    for i in range(5):
-        task = StoppingTask(D=10, nFES=4000, optType=OptimizationType.MINIMIZATION,
-                            benchmark=run.BatAlgorithmBenchmarkA())
-        algo = BatAlgorithm()
-        best = algo.run(task=task)
-        print(best)
+def comparison_by_runner(filename):
+    statistic_bat_algorithm = []
+    for x, y in combined:
+        runner = Runner(
+            D=x,
+            NP=y,
+            nFES=x*1000,
+            nRuns=1,
+            useAlgorithms=["BatAlgorithm"],
+            useBenchmarks=["schwefel"]
+            )
+        runner.run(verbose=True)
+        best = runner.results
+        print(next(iter(best)))
+
+        for algorithm, array in best.items():
+            for benchmark, value in array.items():
+                if algorithm == "BatAlgorithm":
+                    bat_values = st(array=value[0][0], algorithm_name="BatAlgorithm",
+                                    benchmark_name=benchmark, dimension_name=x, Np=y
+                                    ).vrniTupleDim()
+                    statistic_bat_algorithm.append(bat_values)
+                elif algorithm == "HybridBatAlgorithm":
+                    hybrid_bat_values = st(array=value[0][0], algorithm_name="HybridBatAlgorithm",
+                                           benchmark_name=benchmark, dimension_name=x, Np=y
+                                           ).vrniTupleDim()
+                    statistic_bat_algorithm.append(hybrid_bat_values)
+
+    excel = ex()
+    bat_data_frame = excel.tableToDataFrame(statistic_bat_algorithm)
+    excel.export_to_sheets(bat_data_frame, filename)
 
 
 if __name__ == '__main__':
-    runner = Runner(
-        D=20,
-        nFES=1000*20,
-        nRuns=1,
-        useAlgorithms=["BatAlgorithm", "HybridBatAlgorithm"],
-        useBenchmarks=[run.BatAlgorithmBenchmarkQmin(), run.BatAlgorithmBenchmarkQmax(), run.BatAlgorithmBenchmarkNp(),
-                       run.BatAlgorithmBenchmarkA(), run.BatAlgorithmBenchmarkr()])
-    runner.run()
+   comparison_by_runner("testiramo")
+
