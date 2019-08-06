@@ -1,9 +1,9 @@
 import numpy as np
 
-'#Za izračun statističnih podatkov'
+
 class Statistics:
 
-    def __init__(self, array, algorithm_name, benchmark_name, dimension_name=None, Np=None):
+    def __init__(self, array, benchmark_name, algorithm_name=None, dimension_name=None, Np=None):
         self.algorithmName = algorithm_name
         self.dimensionName = dimension_name
         self.population = Np
@@ -36,9 +36,9 @@ class Statistics:
         return self.__std
 
     def vrniTupleDim(self):
-        tup = (self.dimensionName,
-               self.population,
+        tup = (self.algorithmName,
                self.benchName,
+               str("D=" + self.dimensionName + " Np=" + self.population),
                self.__minvalue,
                self.__maxvalue,
                self.__mean,

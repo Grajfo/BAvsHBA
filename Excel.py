@@ -5,8 +5,7 @@ import os.path
 class Excel:
 
     def __init__(self):
-        self.__header = ['Algorithm', 'dimension', 'Bench', 'Min', 'Max', 'Mean', 'Median', 'Std']
-
+        self.__header = ["Alg.", 'Bench.', 'Meas.', 'Min', 'Max', 'Mean', 'Median', 'Std']
 
     def tableToDataFrame(self, table):
         df = pd.DataFrame.from_records(table, columns=self.__header)
@@ -19,12 +18,12 @@ class Excel:
     def header(self):
         return self.__header
 
-    def export_to_sheets(self, df, name, sheet):
+    def export_to_sheets(self, df, name):
         path = r'D:\Žan\Feri ITK\3Letnik\Diploma\program\\' + name + '.xlsx'
         try:
             if os.path.isfile(path):
                 xls_file = pd.ExcelFile(path)
-                dfexisting = xls_file.parse(sheet)
+                dfexisting = xls_file.parse()
                 combined_data = dfexisting.append(df, ignore_index=True)
                 writer = pd.ExcelWriter(path, engine='xlsxwriter')
                 combined_data.to_excel(writer, index=False)
